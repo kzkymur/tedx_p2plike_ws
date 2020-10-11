@@ -18,14 +18,14 @@ server.on('request', function (req, res) {
 			});
 
 		},
-		"resultGenerator": () => {
-			const template = fs.readFile('./result.html', 'utf-8', function (err, data) {
+		"websocket": () => {
+			const template = fs.readFile('./src/websocket.js', 'utf-8', function (err, data) {
 				res.writeHead(200, {
-					'content-Type': 'text/html'
+					'content-Type': 'text/javascript'
 				});
 
 				res.write(data);
-				res.end("HTML file has already sent to browser");
+				res.end();
 			})
 		}
 	};
@@ -34,6 +34,9 @@ server.on('request', function (req, res) {
 
 	if (uri === "/") {
 		Response["renderHTML"](); 
+		return;
+	} else if (uri === "/src/websocket.js") {
+		Response["websocket"](); 
 		return;
 	};
 });

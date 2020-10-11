@@ -1,10 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>シンプルなwebサーバ</title>
+	<meta charset="UTF-8">
+	<title>ws Demo</title>
 </head>
 <body>
-    <p>Webサーバできたよ!!</p>
+	<p>Webサーバできたよ!!</p>
+	<form id='setup'>
+		<input type='radio' id='parent'><label for="parent">親</label>
+		<input type='radio' id='child'><label for="child">子</label>
+		<input type='text' id='roomId'>roomId</input>
+		<button type="submit">enter</button>
+	</form>
+	<form id='send'>
+		<input type='text' id='message'>message</input>
+		<button type="submit">send</button>
+	</form>
+	<script src='./src/websocket.js'></script>
 </body>
 </html>
