@@ -10,40 +10,67 @@ const CommunicationType = {
 	cc: 'comunication_completed',
 }
 
+const isInRoom = (room, id) => {
+	for (const c of room.clients) {
+		if (c.id == id) return true;
+	};
+	return false;
+}
+
+const isCompletedRoom = (room) => {
+	let existMobile = false;
+	let existPC = false;
+	let flag = false
+	for (const c of room.clients) {
+		if (c.isMobile) existMobile = true;
+		else existPC = true;
+		if (existMobile && existPC) return true;
+	}
+	return false;
+}
+
 server.on("connection", ws => {
 	ws.id = uuidv4().split('-')[0];
-    ws.on('message', message => {
-        const json = JSON.parse(message);
-        console.log(json);
+	ws.on('message', message => {
+		const json = JSON.parse(message);
 		let returnData = {};
 		switch(json.type){
 			case CommunicationType.setup: {
 				returnData.type = CommunicationType.setup;
 				let roomId;
 				if(json.isParent) {
-					roomId = uuidv4().split('-')[0];
+					roomId = json.roomId ? json.roomId : uuidv4().split('-')[0];
 					returnData['roomId'] = roomId;
 					room.push({
 						id: roomId,
 						messages: [],
-						clients: [ws.id],
+						clients: [{
+							id: ws.id,
+							isMobile: json.isMobile == String(true),
+						}],
 					});
 				} else {
 					roomId = json.roomId;
 					returnData['roomId'] = roomId;
-					const currentRoom = room.filter(r => r.id === roomId)[0];
-					currentRoom.clients.push(ws.id);
-					room = room.map(r => r.id === roomId ? currentRoom : r);
-					server.clients.forEach(client => {
-						if (currentRoom.clients.indexOf(client.id)>-1) {
-							client.send(JSON.stringify({
-								type: CommunicationType.cc
-							}));
-						};
-					})
+					const currentRoom = room.filter(r => r.id == roomId)[0];
+					if (currentRoom !== undefined) {
+						currentRoom.clients.push({
+							id: ws.id,
+							isMobile: json.isMobile,
+						});
+						room = room.map(r => r.id === roomId ? currentRoom : r);
+						console.log(isCompletedRoom(currentRoom));
+						if (isCompletedRoom(currentRoom)) {
+							server.clients.forEach(client => {
+								if (isInRoom(currentRoom, client.id)) {
+									client.send(JSON.stringify({
+										type: CommunicationType.cc
+									}));
+								}
+							})
+						}
+					}
 				}
-				returnData['messages'] = room.filter(r => r.id === roomId)[0].messages;
-				ws.send(JSON.stringify(returnData));
 				break;
 			}
 			case CommunicationType.send: {
@@ -54,11 +81,11 @@ server.on("connection", ws => {
 				room = room.map(r => r.id === roomId ? currentRoom : r);
 				returnData['messages'] = currentRoom.messages;
 				server.clients.forEach(client => {
-					if (currentRoom.clients.indexOf(client.id)>-1) client.send(JSON.stringify(returnData));
+					if (isInRoom(currentRoom, client.id)) client.send(JSON.stringify(returnData));
 				});
 				break;
 			}
 		}
-    });
+	});
 });
 
