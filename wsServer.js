@@ -20,7 +20,6 @@ const isInRoom = (room, id) => {
 const isCompletedRoom = (room) => {
 	let existMobile = false;
 	let existPC = false;
-	let flag = false
 	for (const c of room.clients) {
 		if (c.isMobile) existMobile = true;
 		else existPC = true;
@@ -59,7 +58,6 @@ server.on("connection", ws => {
 							isMobile: json.isMobile,
 						});
 						room = room.map(r => r.id === roomId ? currentRoom : r);
-						console.log(isCompletedRoom(currentRoom));
 						if (isCompletedRoom(currentRoom)) {
 							server.clients.forEach(client => {
 								if (isInRoom(currentRoom, client.id)) {
@@ -75,11 +73,8 @@ server.on("connection", ws => {
 			}
 			case CommunicationType.send: {
 				returnData.type = CommunicationType.send;
-				const roomId = json.roomId;
-				const currentRoom = room.filter(r=>r.id === roomId)[0];
-				currentRoom.messages.push(json.message);
-				room = room.map(r => r.id === roomId ? currentRoom : r);
-				returnData['messages'] = currentRoom.messages;
+				const currentRoom = room.filter(r=>r.id === json.roomId)[0];
+				returnData.messages = json.message;
 				server.clients.forEach(client => {
 					if (isInRoom(currentRoom, client.id)) client.send(JSON.stringify(returnData));
 				});
