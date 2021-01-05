@@ -77,11 +77,13 @@ server.on("connection", ws => {
 				break;
 			}
 			case CommunicationType.send: {
-				const currentRoom = room.filter(r=>r.id === json.roomId)[0];
+				const currentRoom = room.filter(r=>r.id == json.roomId)[0];
 				returnData = json;
-				server.clients.forEach(client => {
-					if (isInRoom(currentRoom, client.id)) client.send(JSON.stringify(returnData));
-				});
+				if (currentRoom!=undefined) {
+					server.clients.forEach(client => {
+						if (isInRoom(currentRoom, client.id)) client.send(JSON.stringify(returnData));
+					});
+				}
 				break;
 			}
 		}
