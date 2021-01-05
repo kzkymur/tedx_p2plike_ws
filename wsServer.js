@@ -8,6 +8,7 @@ const CommunicationType = {
 	setup: 'SETUP',
 	send: 'send',
 	cc: 'comunication_completed',
+	roomError: 'ROOMERROR',
 }
 
 const isInRoom = (room, id) => {
@@ -67,6 +68,10 @@ server.on("connection", ws => {
 								}
 							})
 						}
+					} else {
+						ws.send(JSON.stringify({
+							type: CommunicationType.roomError
+						}));
 					}
 				}
 				break;
