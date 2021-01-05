@@ -8,7 +8,9 @@
     "serve": "nodemon --exec babel-node server",
     "wsServe": "nodemon --exec babel-node wsServer",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "share": "./ngrok http 8081"
+    "share": "./ngrok http 8081",
+		"wsStart": "forever start wsServer.js",
+		"wsStop": "forever stop wsServer.js"
   },
   "author": "",
   "license": "ISC",
