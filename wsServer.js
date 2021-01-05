@@ -33,6 +33,8 @@ server.on("connection", ws => {
 	ws.id = uuidv4().split('-')[0];
 	ws.on('message', message => {
 		const json = JSON.parse(message);
+		console.log(json);
+		for (const r of room) console.log(r);
 		let returnData = {};
 		switch(json.type){
 			case CommunicationType.setup: {
@@ -68,6 +70,10 @@ server.on("connection", ws => {
 								}
 							})
 						}
+						ws.send(JSON.stringify({
+							type: CommunicationType.setup,
+							roomId: roomId
+						}));
 					} else {
 						ws.send(JSON.stringify({
 							type: CommunicationType.roomError
@@ -88,5 +94,22 @@ server.on("connection", ws => {
 			}
 		}
 	});
+	ws.on('close', ()=>{
+		let currentRoom;
+		console.log('closeId:'+ ws.id);
+		for (const r of room) {
+			if (isInRoom(r, ws.id)) {
+				currentRoom = {...r};
+				currentRoom.clients = currentRoom.clients.filter(c => c.id != ws.id);
+				break;
+			}
+		}
+		if (currentRoom) room = room.map(r => r.id == currentRoom.id ? currentRoom : r);
+		for (const r of room) {
+			if (r.clients.length == 0) {
+				room = room.filter(ro => ro.id != r.id);
+			}
+		}
+	})
 });
 
