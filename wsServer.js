@@ -77,9 +77,8 @@ server.on("connection", ws => {
 				break;
 			}
 			case CommunicationType.send: {
-				returnData.type = CommunicationType.send;
 				const currentRoom = room.filter(r=>r.id === json.roomId)[0];
-				returnData.messages = json.message;
+				returnData = json;
 				server.clients.forEach(client => {
 					if (isInRoom(currentRoom, client.id)) client.send(JSON.stringify(returnData));
 				});
