@@ -1,8 +1,7 @@
+import https from "https";
+import fs from "fs";
 import WS from 'ws';
 import { v4 as uuidv4 } from 'uuid';
-
-const server = new WS.Server({ port: 5001 });
-let room = [];
 
 const CommunicationType = {
 	setup: 'SETUP',
@@ -28,6 +27,20 @@ const isCompletedRoom = (room) => {
 	}
 	return false;
 }
+
+
+const app = https.createServer({
+    key: fs.readFileSync("/etc/letsencrypt/live/invisible.kzkymur.com/privkey.pem"),
+    cert: fs.readFileSync("/etc/letsencrypt/live/invisible.kzkymur.com/cert.pem")
+}, (req, res) => {
+    // ダミーリクエスト処理
+    res.writeHead(200);
+    res.end("All glory to WebSockets!\n");
+}).listen(5001);
+
+const server = new WS.Server({ server: app });
+let room = [];
+
 
 server.on("connection", ws => {
 	ws.id = uuidv4().split('-')[0];
